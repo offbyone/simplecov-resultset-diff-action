@@ -131,11 +131,41 @@ ${content}
       return
     }
 
+    const existingComments = await octokit.issues.listComments({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      issue_number: pullRequestId
+    })
+
     await octokit.issues.createComment({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
       issue_number: pullRequestId,
       body: message
+    })
+
+    /*
+     * Now that we've created our comment, let's clean up all the comments we previous made.
+     *
+     * Those looke like this:
+     *
+     * - from github-actions[bot]:
+     * - the body starts with `## Coverage difference`
+     */
+    existingComments.data.forEach(async comment => {
+      if (comment.user.login !== 'github-actions[bot]') {
+        return
+      }
+
+      if (!comment.body.startsWith('## Coverage difference')) {
+        return
+      }
+
+      await octokit.issues.deleteComment({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        comment_id: comment.id
+      })
     })
   } catch (error) {
     core.setFailed(error.message)
