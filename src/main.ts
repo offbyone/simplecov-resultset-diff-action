@@ -131,13 +131,13 @@ ${content}
       return
     }
 
-    const existingComments = await octokit.issues.listComments({
+    const existingComments = await octokit.rest.issues.listComments({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
       issue_number: pullRequestId
     })
 
-    await octokit.issues.createComment({
+    await octokit.rest.issues.createComment({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
       issue_number: pullRequestId,
@@ -152,27 +152,22 @@ ${content}
      * - from github-actions[bot]:
      * - the body starts with `## Coverage difference`
      */
-    existingComments.data.forEach(async comment => {
-      console.log(`Comment by ${comment.user.login}, id=${comment.id}`)
-      if (comment.user.login !== 'github-actions[bot]') {
+    for await (const comment of existingComments.data) {
+      if (comment.user?.login !== 'github-actions[bot]') {
         return
       }
 
-      if (!comment.body.startsWith('## Coverage difference')) {
+      if (!comment.body?.startsWith('## Coverage difference')) {
         return
       }
 
-      console.log(
-        `Comment by ${comment.user.login}, id=${comment.id} --> will be deleted`
-      )
-
-      await octokit.issues.deleteComment({
+      await octokit.rest.issues.deleteComment({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
         comment_id: comment.id
       })
-    })
-  } catch (error) {
+    }
+  } catch (error: any) {
     core.setFailed(error.message)
   }
 }
