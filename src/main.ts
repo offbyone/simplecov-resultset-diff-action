@@ -153,6 +153,7 @@ ${content}
      * - the body starts with `## Coverage difference`
      */
     existingComments.data.forEach(async comment => {
+      console.log(`Comment by ${comment.user.login}, id=${comment.id}`)
       if (comment.user.login !== 'github-actions[bot]') {
         return
       }
@@ -160,6 +161,10 @@ ${content}
       if (!comment.body.startsWith('## Coverage difference')) {
         return
       }
+
+      console.log(
+        `Comment by ${comment.user.login}, id=${comment.id} --> will be deleted`
+      )
 
       await octokit.issues.deleteComment({
         owner: github.context.repo.owner,
