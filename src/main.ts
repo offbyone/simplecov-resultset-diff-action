@@ -154,11 +154,11 @@ ${content}
      */
     for await (const comment of existingComments.data) {
       if (comment.user?.login !== 'github-actions[bot]') {
-        return
+        continue
       }
 
       if (!comment.body?.startsWith('## Coverage difference')) {
-        return
+        continue
       }
 
       await octokit.rest.issues.deleteComment({
