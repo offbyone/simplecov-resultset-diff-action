@@ -2,7 +2,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as github from '@actions/github'
 import * as core from '@actions/core'
-import markdownTable from 'markdown-table'
+import {markdownTable} from 'markdown-table'
 import {
   ResultSet,
   Coverage,
@@ -154,11 +154,11 @@ ${content}
      */
     for await (const comment of existingComments.data) {
       if (comment.user?.login !== 'github-actions[bot]') {
-        return
+        continue
       }
 
       if (!comment.body?.startsWith('## Coverage difference')) {
-        return
+        continue
       }
 
       await octokit.rest.issues.deleteComment({
